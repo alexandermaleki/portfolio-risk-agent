@@ -26,13 +26,40 @@ def daily_returns(prices):
     """
     return prices.pct_change().dropna()
 
-if __name__ == "__main__":
-    prices = fetch_prices("INVE-B.ST", "2024-01-01", "2024-12-31")
-    returns = daily_returns(prices)
+def annualised_volatility(returns):
+    """Standard deviation of daily returns, scaled to a yearly figure.
 
-    print(returns.head())
-    print(f"\nPrice rows:  {len(prices)}")
-    print(f"Return rows: {len(returns)}")
-    print(f"Mean daily return: {returns.mean():.5f}")
-    print(f"Largest gain:      {returns.max():.4f}")
-    print(f"Largest loss:      {returns.min():.4f}")
+    Uses 252 trading days per year.
+    """
+    return returns.std() * (252 ** 0.5)
+
+def max_drawdown(prices):
+    """Largest peak-to-trough fall over the period, as a negative fraction.
+
+    -0.25 means that at the worst point the price was 25% below its
+    previous high.
+    """
+    running_peak = prices.cummax()
+    drawdown = prices / running_peak - 1
+    return drawdown.min()
+
+def correlation(returns_a, returns_b):
+    """Correlation of two return series, aligned by date.
+
+    1 means they move together perfectly, 0 means no relationship,
+    -1 means they move in opposite directions.
+    """
+    return returns_a.corr(returns_b)
+
+if __name__ == "__main__":
+    inve = fetch_prices("INVE-B.ST", "2024-01-01", "2024-12-31")
+    volv = fetch_prices("VOLV-B.ST", "2024-01-01", "2024-12-31")
+
+    inve_r = daily_returns(inve)
+    volv_r = daily_returns(volv)
+
+    print(f"Investor volatility: {annualised_volatility(inve_r):.4f}")
+    print(f"Investor drawdown:   {max_drawdown(inve):.4f}")
+    print(f"Volvo volatility:    {annualised_volatility(volv_r):.4f}")
+    print(f"Volvo drawdown:      {max_drawdown(volv):.4f}")
+    print(f"Correlation:         {correlation(inve_r, volv_r):.4f}")
