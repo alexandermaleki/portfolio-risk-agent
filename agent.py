@@ -76,8 +76,3 @@ def run_agent(question):
             })
 
     return "Stopped: reached the maximum number of steps."
-
-
-if __name__ == "__main__":
-    answer = run_agent("What was the volatility of Investor B in 2024?")
-    print("\n" + answer)
