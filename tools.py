@@ -51,15 +51,25 @@ def correlation(returns_a, returns_b):
     """
     return returns_a.corr(returns_b)
 
+def get_volatility(ticker, start, end):
+    """Agent-facing: annualised volatility for one ticker over a period."""
+    prices = fetch_prices(ticker, start, end)
+    returns = daily_returns(prices)
+    return round(float(annualised_volatility(returns)), 4)
+
+def get_max_drawdown(ticker, start, end):
+    """Agent-facing: worst peak-to-trough fall for one ticker over a period."""
+    prices = fetch_prices(ticker, start, end)
+    return round(float(max_drawdown(prices)), 4)
+
+
+def get_correlation(ticker_a, ticker_b, start, end):
+    """Agent-facing: correlation of daily returns between two tickers."""
+    returns_a = daily_returns(fetch_prices(ticker_a, start, end))
+    returns_b = daily_returns(fetch_prices(ticker_b, start, end))
+    return round(float(correlation(returns_a, returns_b)), 4)
+
 if __name__ == "__main__":
-    inve = fetch_prices("INVE-B.ST", "2024-01-01", "2024-12-31")
-    volv = fetch_prices("VOLV-B.ST", "2024-01-01", "2024-12-31")
-
-    inve_r = daily_returns(inve)
-    volv_r = daily_returns(volv)
-
-    print(f"Investor volatility: {annualised_volatility(inve_r):.4f}")
-    print(f"Investor drawdown:   {max_drawdown(inve):.4f}")
-    print(f"Volvo volatility:    {annualised_volatility(volv_r):.4f}")
-    print(f"Volvo drawdown:      {max_drawdown(volv):.4f}")
-    print(f"Correlation:         {correlation(inve_r, volv_r):.4f}")
+    print(get_volatility("INVE-B.ST", "2024-01-01", "2024-12-31"))
+    print(get_max_drawdown("INVE-B.ST", "2024-01-01", "2024-12-31"))
+    print(get_correlation("INVE-B.ST", "VOLV-B.ST", "2024-01-01", "2024-12-31"))
